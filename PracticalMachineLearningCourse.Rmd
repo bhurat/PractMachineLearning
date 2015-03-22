@@ -1,0 +1,86 @@
+---
+title: "Predicting Exercises"
+author: "Basile H"
+date: "March 19, 2015"
+output: pdf_document
+---
+
+
+#Data Cleaning
+```{r}
+setwd("~/Documents/Coursera Programming Files/Practical Machine Learning/")
+dat<-read.csv("pml-training.csv")
+library(caret)
+library(randomForest)
+set.seed(96720)
+```
+
+```{r}
+k<-1:7
+for (i in 1:ncol(dat)) {
+         if (sum(dat[,i]=="#DIV/0!")>0 || sum(dat[,i]==" ")>0 || sum(is.na(dat[,i]))){
+                 k<-c(k,i)
+                 }
+         }
+datCL<-dat[,-k]
+```
+
+testing models
+```{r}
+datCLSub<-datCL[sample(1:nrow(datCL),2000),]
+inTrain<-createDataPartition(y=datCLSub$classe,p=.6,list=FALSE)
+training<-datCLSub[inTrain,]
+testing<-datCLSub[-inTrain,]
+```
+Linear Discriminant Analysis
+```{r}
+ModFitLDA<-train(classe~.,data=training,method="lda")
+predLDA<-predict(ModFitLDA,newdata=testing)
+ConfMatLDA<-confusionMatrix(testing$classe,predLDA)
+ConfMatLDA$overall[1]
+```
+Random Forest
+```{r}
+ModFitRF<-randomForest(classe~.,data=training)
+predRF<-predict(ModFitRF,newdata=testing)
+ConfMatRF<-confusionMatrix(testing$classe,predRF)
+ConfMatRF$overall[1]
+```
+
+
+Cross validation data splitting k = 5
+```{r}
+#K-fold cross validation with K=5
+trainFolds<-createFolds(y=datCL$classe,k=5,list=TRUE,returnTrain=TRUE)
+```
+
+```{r}
+ModFit1<-randomForest(classe~.,data=datCL[trainFolds[[1]],])
+pred1<-predict(ModFit1,newdata=datCL[-trainFolds[[1]],])
+ConfMat1<-confusionMatrix(datCL$classe[-trainFolds[[1]]],pred1)
+ModFit2<-randomForest(classe~.,data=datCL[trainFolds[[2]],])
+pred2<-predict(ModFit2,newdata=datCL[-trainFolds[[2]],])
+ConfMat2<-confusionMatrix(datCL$classe[-trainFolds[[2]]],pred2)
+ModFit3<-randomForest(classe~.,data=datCL[trainFolds[[3]],])
+pred3<-predict(ModFit3,newdata=datCL[-trainFolds[[3]],])
+ConfMat3<-confusionMatrix(datCL$classe[-trainFolds[[3]]],pred3)
+ModFit4<-randomForest(classe~.,data=datCL[trainFolds[[4]],])
+pred4<-predict(ModFit4,newdata=datCL[-trainFolds[[4]],])
+ConfMat4<-confusionMatrix(datCL$classe[-trainFolds[[4]]],pred4)
+ModFit5<-randomForest(classe~.,data=datCL[trainFolds[[5]],])
+pred5<-predict(ModFit5,newdata=datCL[-trainFolds[[5]],])
+ConfMat5<-confusionMatrix(datCL$classe[-trainFolds[[5]]],pred5)
+Accuracies<-c(ConfMat1$overall[1],ConfMat2$overall[1],ConfMat3$overall[1],
+              ConfMat4$overall[1],ConfMat5$overall[1])
+ConfMat1$table
+ConfMat2$table
+ConfMat3$table
+ConfMat4$table
+ConfMat5$table
+mean(Accuracies)
+```
+
+```{r}
+ModFitFin<-randomForest(classe~.,data=datCL)
+ModFitFin
+```
