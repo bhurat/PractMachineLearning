@@ -14,7 +14,7 @@ First, we loaded the data set and required packages (caret and randomForest)
 
 
 ```r
-dat<-read.csv("~/Documents/Coursera Programming Files/Practical Machine Learning/pml-training.csv")
+dat<-read.csv("~/Documents/Coursera Programming Files/PractMachineLearning/pml-training.csv")
 library(caret)
 library(randomForest)
 set.seed(96720)
@@ -78,3 +78,4 @@ This post from discussion sections, which focuses on strategies to reduce CPU us
 
 Quick - R: Articles on Discriminant Function Analysis (http://www.statmethods.net/advstats/discriminant.html) and Tree-Based Models (http://www.statmethods.net/advstats/cart.html)
 
+Site with data and description of data: http://groupware.les.inf.puc-rio.br/har
